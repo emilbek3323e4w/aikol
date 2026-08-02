@@ -1,0 +1,133 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum EventType {
+  TOI
+  CORPORATE
+  QURAN
+  KIDS
+  OTHER
+}
+
+// ==================== МЕНЮ ====================
+
+model MenuCategory {
+  id                String             @id @default(cuid())
+  name              String
+  nameKg            String
+  order             Int                @default(0)
+  items             MenuItem[]
+  packageSelections PackageSelection[]
+}
+
+model MenuItem {
+  id          String       @id @default(cuid())
+  name        String
+  nameKg      String
+  image       String?
+  isAvailable Boolean      @default(true)
+  order       Int          @default(0)
+  categoryId  String
+  category    MenuCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([categoryId])
+  @@index([isAvailable])
+}
+
+// ==================== БАНКЕТНЫЕ ПАКЕТЫ ====================
+
+model Package {
+  id            String             @id @default(cuid())
+  name          String
+  pricePerGuest Int
+  fixedItems    String[]
+  fixedItemsKg  String[]
+  selections    PackageSelection[]
+  isAvailable   Boolean            @default(true)
+  order         Int                @default(0)
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+}
+
+model PackageSelection {
+  id         String       @id @default(cuid())
+  packageId  String
+  categoryId String
+  quantity   Int
+  package    Package      @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  category   MenuCategory @relation(fields: [categoryId], references: [id])
+}
+
+model ExtraService {
+  id          String  @id @default(cuid())
+  name        String
+  nameKg      String
+  price       Int
+  priceNote   String?
+  isAvailable Boolean @default(true)
+  order       Int     @default(0)
+}
+
+// ==================== ОТЗЫВЫ ====================
+
+model Review {
+  id         String       @id @default(cuid())
+  clientName String
+  rating     Int
+  comment    String       @db.Text
+  status     ReviewStatus @default(PENDING)
+  createdAt  DateTime     @default(now())
+
+  @@index([status])
+}
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// ==================== ГАЛЕРЕЯ ====================
+
+model GalleryPhoto {
+  id        String      @id @default(cuid())
+  url       String
+  publicId  String
+  eventType EventType?
+  order     Int         @default(0)
+  createdAt DateTime    @default(now())
+
+  @@index([eventType])
+}
+
+// ==================== НОВОСТИ ====================
+
+model News {
+  id          String   @id @default(cuid())
+  title       String
+  titleKg     String
+  body        String   @db.Text
+  bodyKg      String   @db.Text
+  image       String?
+  isPublished Boolean  @default(true)
+  publishedAt DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isPublished])
+}
+
+// ==================== НАСТРОЙКИ ====================
+
+model Settings {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String @db.Text
+}

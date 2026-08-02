@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+:root {
+  --color-bg: #ffffff;
+  --color-bg-secondary: #f6f4ef;
+  --color-gold: #a8842e;
+  --color-gold-hover: #8f6f26;
+  --color-on-gold: #ffffff;
+  --color-text: #1a1a1a;
+  --color-text-muted: #6b6b6b;
+  --color-success: #2e7d32;
+  --color-warning: #e08600;
+  --color-danger: #d32f2f;
+  --color-line: rgba(0, 0, 0, 0.1);
+  --color-surface-muted: rgba(0, 0, 0, 0.04);
+  --color-hover: rgba(0, 0, 0, 0.05);
+}
+
+@theme inline {
+  --color-bg: var(--color-bg);
+  --color-bg-secondary: var(--color-bg-secondary);
+  --color-gold: var(--color-gold);
+  --color-gold-hover: var(--color-gold-hover);
+  --color-on-gold: var(--color-on-gold);
+  --color-text: var(--color-text);
+  --color-text-muted: var(--color-text-muted);
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-danger: var(--color-danger);
+  --color-line: var(--color-line);
+  --color-surface-muted: var(--color-surface-muted);
+  --color-hover: var(--color-hover);
+  --font-heading: var(--font-playfair);
+  --font-sans: var(--font-inter);
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+}
