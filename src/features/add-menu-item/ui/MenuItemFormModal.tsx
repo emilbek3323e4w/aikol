@@ -33,6 +33,7 @@ export function MenuItemFormModal({
     editItem?.categoryId ?? defaultCategoryId,
   );
   const [image, setImage] = useState(editItem?.image ?? "");
+  const [isFeatured, setIsFeatured] = useState(editItem?.isFeatured ?? false);
   const [saving, setSaving] = useState(false);
 
   const isEdit = Boolean(editItem);
@@ -45,6 +46,7 @@ export function MenuItemFormModal({
       name,
       nameKg,
       image: image || undefined,
+      isFeatured,
       categoryId,
     };
 
@@ -102,6 +104,16 @@ export function MenuItemFormModal({
           <img src={image} alt="" className="h-32 w-full rounded-lg object-cover" />
         )}
         <UploadDropzone onUploaded={(r) => setImage(r.url)} />
+
+        <label className="flex items-center gap-2 text-sm text-text-muted">
+          <input
+            type="checkbox"
+            checked={isFeatured}
+            onChange={(e) => setIsFeatured(e.target.checked)}
+            className="h-4 w-4 accent-gold"
+          />
+          Показывать в «Популярных» на главной
+        </label>
 
         <Button type="submit" disabled={saving}>
           {isEdit ? "Сохранить" : "Добавить"}

@@ -2,20 +2,21 @@ import { useLocale, useTranslations } from "next-intl";
 import { Hero } from "@/widgets/hero";
 import { Link } from "@/shared/i18n/navigation";
 import { Button } from "@/shared/ui/Button";
-import { MenuCard } from "@/entities/menu-item";
+import type { MenuItem } from "@/entities/menu-item/model/types";
 import { ReviewCard } from "@/entities/review";
 import type { Review } from "@/entities/review";
 import type { SettingsMap } from "@/entities/settings/model/keys";
 import { EVENT_TYPES } from "@/shared/config/constants";
 import { getWhatsappHref } from "@/shared/lib/contact";
-import { SEED_POPULAR_DISHES } from "../model/seed";
+import { FeaturedDishesSection } from "./FeaturedDishesSection";
 
 interface HomePageProps {
   reviews: Review[];
   settings: SettingsMap;
+  featuredDishes: MenuItem[];
 }
 
-export function HomePage({ reviews, settings }: HomePageProps) {
+export function HomePage({ reviews, settings, featuredDishes }: HomePageProps) {
   const t = useTranslations("home");
   const tEvents = useTranslations("eventTypes");
   const locale = useLocale();
@@ -74,21 +75,14 @@ export function HomePage({ reviews, settings }: HomePageProps) {
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-        <div className="mb-8 flex items-center justify-between">
-          <h2 className="font-heading text-3xl text-gold">
-            {t("popularDishesTitle")}
-          </h2>
-          <Link href="/menu" className="text-sm text-gold hover:underline">
-            {t("popularDishesCta")} →
-          </Link>
-        </div>
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-          {SEED_POPULAR_DISHES.map((item) => (
-            <MenuCard key={item.id} item={item} locale={locale} />
-          ))}
-        </div>
-      </section>
+      {featuredDishes.length > 0 && (
+        <FeaturedDishesSection
+          dishes={featuredDishes}
+          locale={locale}
+          title={t("popularDishesTitle")}
+          cta={t("popularDishesCta")}
+        />
+      )}
 
       <section className="bg-bg-secondary py-16">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">

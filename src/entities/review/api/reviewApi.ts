@@ -50,7 +50,7 @@ export async function moderateReview(
   status: Review["status"],
 ): Promise<Review> {
   const review = await prisma.review.update({ where: { id }, data: { status } });
-  revalidateTag("reviews", "max");
+  revalidateTag("reviews", { expire: 0 });
   return serialize(review);
 }
 

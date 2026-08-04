@@ -33,7 +33,7 @@ export async function createExtraService(
   const service = await prisma.extraService.create({
     data: { ...input, order: count },
   });
-  revalidateTag("extra-services", "max");
+  revalidateTag("extra-services", { expire: 0 });
   return service;
 }
 
@@ -42,11 +42,11 @@ export async function updateExtraService(
   input: Partial<ExtraServiceInput> & { isAvailable?: boolean },
 ): Promise<ExtraService> {
   const service = await prisma.extraService.update({ where: { id }, data: input });
-  revalidateTag("extra-services", "max");
+  revalidateTag("extra-services", { expire: 0 });
   return service;
 }
 
 export async function deleteExtraService(id: string): Promise<void> {
   await prisma.extraService.delete({ where: { id } });
-  revalidateTag("extra-services", "max");
+  revalidateTag("extra-services", { expire: 0 });
 }

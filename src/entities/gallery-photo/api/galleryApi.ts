@@ -46,7 +46,7 @@ export async function createGalleryPhoto(input: {
   const photo = await prisma.galleryPhoto.create({
     data: { ...input, order: count },
   });
-  revalidateTag("gallery", "max");
+  revalidateTag("gallery", { expire: 0 });
   return serialize(photo);
 }
 
@@ -55,5 +55,5 @@ export async function deleteGalleryPhoto(id: string): Promise<void> {
   if (!photo) return;
   await prisma.galleryPhoto.delete({ where: { id } });
   await cloudinary.uploader.destroy(photo.publicId).catch(() => {});
-  revalidateTag("gallery", "max");
+  revalidateTag("gallery", { expire: 0 });
 }

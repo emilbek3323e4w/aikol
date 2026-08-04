@@ -27,6 +27,7 @@ interface PackageFormModalProps {
   open: boolean;
   onClose: () => void;
   categories: CategoryOption[];
+  allPackages?: Package[];
   editPackage?: Package | null;
   onSaved: () => void;
 }
@@ -35,6 +36,7 @@ export function PackageFormModal({
   open,
   onClose,
   categories,
+  allPackages = [],
   editPackage,
   onSaved,
 }: PackageFormModalProps) {
@@ -60,8 +62,24 @@ export function PackageFormModal({
       : [],
   );
   const [saving, setSaving] = useState(false);
+  const [copySourceId, setCopySourceId] = useState("");
 
   const isEdit = Boolean(editPackage);
+
+  const copyCandidates = allPackages.filter((p) => p.id !== editPackage?.id);
+
+  const handleCopyFixedItems = () => {
+    const source = copyCandidates.find((p) => p.id === copySourceId);
+    if (!source) return;
+    const rows = source.fixedItems.map((ru, i) => ({
+      ru,
+      kg: source.fixedItemsKg[i] ?? "",
+    }));
+    setFixedItemRows((prev) => {
+      const hasContent = prev.some((row) => row.ru.trim() || row.kg.trim());
+      return hasContent ? [...prev, ...rows] : rows;
+    });
+  };
 
   const addFixedItemRow = () =>
     setFixedItemRows((prev) => [...prev, { ru: "", kg: "" }]);
@@ -157,6 +175,31 @@ export function PackageFormModal({
               + Добавить позицию
             </Button>
           </div>
+
+          {copyCandidates.length > 0 && (
+            <div className="mb-3 flex items-center gap-2">
+              <div className="flex-1">
+                <Select
+                  value={copySourceId}
+                  onChange={(e) => setCopySourceId(e.target.value)}
+                  options={copyCandidates.map((p) => ({
+                    value: p.id,
+                    label: `${p.name} (${p.pricePerGuest} сом)`,
+                  }))}
+                  placeholder="Скопировать из пакета..."
+                />
+              </div>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={handleCopyFixedItems}
+                disabled={!copySourceId}
+              >
+                Копировать
+              </Button>
+            </div>
+          )}
+
           <div className="flex flex-col gap-2">
             {fixedItemRows.map((row, i) => (
               <div key={i} className="flex items-center gap-2">
@@ -178,13 +221,14 @@ export function PackageFormModal({
                     }
                   />
                 </div>
-                <Button
+                <button
                   type="button"
-                  variant="ghost"
+                  aria-label="Удалить позицию"
                   onClick={() => removeFixedItemRow(i)}
+                  className="flex h-11 w-9 shrink-0 items-center justify-center text-text-muted hover:text-danger"
                 >
                   ✕
-                </Button>
+                </button>
               </div>
             ))}
           </div>
@@ -227,13 +271,14 @@ export function PackageFormModal({
                     }
                   />
                 </div>
-                <Button
+                <button
                   type="button"
-                  variant="ghost"
+                  aria-label="Удалить блок выбора"
                   onClick={() => removeSelectionRow(i)}
+                  className="flex h-11 w-9 shrink-0 items-center justify-center text-text-muted hover:text-danger"
                 >
                   ✕
-                </Button>
+                </button>
               </div>
             ))}
           </div>

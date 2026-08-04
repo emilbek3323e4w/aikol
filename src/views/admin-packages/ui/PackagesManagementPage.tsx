@@ -241,6 +241,7 @@ export function PackagesManagementPage() {
           open={packageModalOpen}
           onClose={() => setPackageModalOpen(false)}
           categories={categories}
+          allPackages={packages}
           editPackage={editPackage}
           onSaved={loadAll}
         />

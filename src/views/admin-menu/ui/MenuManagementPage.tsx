@@ -7,6 +7,7 @@ import { Modal } from "@/shared/ui/Modal";
 import { Input } from "@/shared/ui/Input";
 import { Spinner } from "@/shared/ui/Spinner";
 import { useToast } from "@/shared/ui/Toast";
+import { UploadDropzone } from "@/features/upload-photo";
 import { MenuItemFormModal } from "@/features/add-menu-item";
 import type { MenuCategory, MenuItem } from "@/entities/menu-item/model/types";
 
@@ -17,8 +18,10 @@ export function MenuManagementPage() {
   const [activeCategoryId, setActiveCategoryId] = useState<string>("");
 
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
+  const [editCategory, setEditCategory] = useState<MenuCategory | null>(null);
   const [categoryName, setCategoryName] = useState("");
   const [categoryNameKg, setCategoryNameKg] = useState("");
+  const [categoryImage, setCategoryImage] = useState("");
   const [savingCategory, setSavingCategory] = useState(false);
 
   const [itemModalOpen, setItemModalOpen] = useState(false);
@@ -44,23 +47,46 @@ export function MenuManagementPage() {
 
   const activeCategory = categories.find((c) => c.id === activeCategoryId);
 
-  const handleCreateCategory = async (e: React.FormEvent) => {
+  const openCreateCategory = () => {
+    setEditCategory(null);
+    setCategoryName("");
+    setCategoryNameKg("");
+    setCategoryImage("");
+    setCategoryModalOpen(true);
+  };
+
+  const openEditCategory = (category: MenuCategory) => {
+    setEditCategory(category);
+    setCategoryName(category.name);
+    setCategoryNameKg(category.nameKg);
+    setCategoryImage(category.image ?? "");
+    setCategoryModalOpen(true);
+  };
+
+  const handleSaveCategory = async (e: React.FormEvent) => {
     e.preventDefault();
     setSavingCategory(true);
-    const res = await fetch("/api/menu/categories", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: categoryName, nameKg: categoryNameKg }),
-    });
+    const isEdit = Boolean(editCategory);
+    const payload = {
+      name: categoryName,
+      nameKg: categoryNameKg,
+      image: categoryImage || undefined,
+    };
+    const res = await fetch(
+      isEdit ? `/api/menu/categories/${editCategory!.id}` : "/api/menu/categories",
+      {
+        method: isEdit ? "PATCH" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      },
+    );
     setSavingCategory(false);
     if (res.ok) {
-      showToast("Категория добавлена", "success");
+      showToast(isEdit ? "Категория обновлена" : "Категория добавлена", "success");
       setCategoryModalOpen(false);
-      setCategoryName("");
-      setCategoryNameKg("");
       loadCategories();
     } else {
-      showToast("Не удалось создать категорию", "error");
+      showToast("Не удалось сохранить категорию", "error");
     }
   };
 
@@ -81,6 +107,49 @@ export function MenuManagementPage() {
     if (!res.ok) {
       showToast("Не удалось изменить доступность", "error");
       loadCategories();
+    }
+  };
+
+  const handleToggleFeatured = async (item: MenuItem) => {
+    setCategories((prev) =>
+      prev.map((c) => ({
+        ...c,
+        items: c.items.map((i) =>
+          i.id === item.id ? { ...i, isFeatured: !i.isFeatured } : i,
+        ),
+      })),
+    );
+    const res = await fetch(`/api/menu/${item.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ isFeatured: !item.isFeatured }),
+    });
+    if (!res.ok) {
+      showToast("Не удалось изменить «Популярное»", "error");
+      loadCategories();
+    }
+  };
+
+  const handleDeleteCategory = async (category: MenuCategory) => {
+    if (
+      !confirm(
+        `Удалить категорию «${category.name}»? Все блюда в ней тоже будут удалены.`,
+      )
+    )
+      return;
+    const res = await fetch(`/api/menu/categories/${category.id}`, {
+      method: "DELETE",
+    });
+    if (res.ok) {
+      showToast("Категория удалена", "success");
+      const remaining = categories.filter((c) => c.id !== category.id);
+      setActiveCategoryId((prev) =>
+        prev === category.id ? (remaining[0]?.id ?? "") : prev,
+      );
+      loadCategories();
+    } else {
+      const json = await res.json().catch(() => null);
+      showToast(json?.error?.message ?? "Не удалось удалить категорию", "error");
     }
   };
 
@@ -107,7 +176,7 @@ export function MenuManagementPage() {
     <div>
       <div className="mb-6 flex items-center justify-between">
         <h1 className="font-heading text-2xl text-gold">Меню</h1>
-        <Button onClick={() => setCategoryModalOpen(true)} variant="secondary">
+        <Button onClick={openCreateCategory} variant="secondary">
           + Категория
         </Button>
       </div>
@@ -118,18 +187,53 @@ export function MenuManagementPage() {
         <>
           <div className="mb-6 flex flex-wrap gap-2">
             {categories.map((c) => (
-              <button
+              <div
                 key={c.id}
-                type="button"
-                onClick={() => setActiveCategoryId(c.id)}
-                className={`min-h-11 rounded-lg px-4 py-2 text-sm ${
-                  activeCategoryId === c.id
-                    ? "bg-gold text-on-gold font-medium"
-                    : "bg-bg-secondary text-text-muted"
+                className={`flex items-center gap-1 overflow-hidden rounded-lg pl-1 ${
+                  activeCategoryId === c.id ? "bg-gold" : "bg-bg-secondary"
                 }`}
               >
-                {c.name}
-              </button>
+                {c.image && (
+                  <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full">
+                    <Image src={c.image} alt="" fill className="object-cover" />
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setActiveCategoryId(c.id)}
+                  className={`min-h-11 px-3 py-2 text-sm ${
+                    activeCategoryId === c.id
+                      ? "text-on-gold font-medium"
+                      : "text-text-muted"
+                  }`}
+                >
+                  {c.name}
+                </button>
+                <button
+                  type="button"
+                  aria-label={`Изменить категорию «${c.name}»`}
+                  onClick={() => openEditCategory(c)}
+                  className={`flex h-11 w-9 shrink-0 items-center justify-center text-sm ${
+                    activeCategoryId === c.id
+                      ? "text-on-gold/70 hover:text-on-gold"
+                      : "text-text-muted hover:text-gold"
+                  }`}
+                >
+                  ✎
+                </button>
+                <button
+                  type="button"
+                  aria-label={`Удалить категорию «${c.name}»`}
+                  onClick={() => handleDeleteCategory(c)}
+                  className={`flex h-11 w-9 shrink-0 items-center justify-center text-sm ${
+                    activeCategoryId === c.id
+                      ? "text-on-gold/70 hover:text-on-gold"
+                      : "text-text-muted hover:text-danger"
+                  }`}
+                >
+                  ✕
+                </button>
+              </div>
             ))}
           </div>
 
@@ -169,6 +273,15 @@ export function MenuManagementPage() {
                   />
                   Доступно
                 </label>
+                <label className="flex items-center gap-2 text-xs text-text-muted">
+                  <input
+                    type="checkbox"
+                    checked={item.isFeatured}
+                    onChange={() => handleToggleFeatured(item)}
+                    className="h-4 w-4 accent-gold"
+                  />
+                  Популярное
+                </label>
                 <Button
                   variant="ghost"
                   onClick={() => {
@@ -190,9 +303,9 @@ export function MenuManagementPage() {
       <Modal
         open={categoryModalOpen}
         onClose={() => setCategoryModalOpen(false)}
-        title="Новая категория"
+        title={editCategory ? "Редактировать категорию" : "Новая категория"}
       >
-        <form onSubmit={handleCreateCategory} className="flex flex-col gap-4">
+        <form onSubmit={handleSaveCategory} className="flex flex-col gap-4">
           <Input
             label="Название (RU)"
             value={categoryName}
@@ -205,8 +318,26 @@ export function MenuManagementPage() {
             onChange={(e) => setCategoryNameKg(e.target.value)}
             required
           />
+
+          <div>
+            <p className="mb-1.5 text-sm text-text-muted">
+              Фото категории (опционально)
+            </p>
+            {categoryImage && (
+              <div className="relative mb-2 h-32 w-full overflow-hidden rounded-lg">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={categoryImage}
+                  alt=""
+                  className="h-32 w-full rounded-lg object-cover"
+                />
+              </div>
+            )}
+            <UploadDropzone onUploaded={(r) => setCategoryImage(r.url)} />
+          </div>
+
           <Button type="submit" disabled={savingCategory}>
-            Создать
+            {editCategory ? "Сохранить" : "Создать"}
           </Button>
         </form>
       </Modal>

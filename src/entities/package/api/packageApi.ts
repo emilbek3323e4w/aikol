@@ -37,7 +37,7 @@ const includeSelections = {
 async function fetchPackages(): Promise<Package[]> {
   const packages = await prisma.package.findMany({
     where: { isAvailable: true },
-    orderBy: [{ order: "asc" }, { pricePerGuest: "asc" }],
+    orderBy: { pricePerGuest: "asc" },
     include: includeSelections,
   });
   return packages.map(serializePackage);
@@ -90,7 +90,7 @@ export async function createPackage(input: PackageInput): Promise<Package> {
     },
     include: includeSelections,
   });
-  revalidateTag("packages", "max");
+  revalidateTag("packages", { expire: 0 });
   return serializePackage(pkg);
 }
 
@@ -109,13 +109,13 @@ export async function updatePackage(
     },
     include: includeSelections,
   });
-  revalidateTag("packages", "max");
+  revalidateTag("packages", { expire: 0 });
   return serializePackage(pkg);
 }
 
 export async function deletePackage(id: string): Promise<void> {
   await prisma.package.delete({ where: { id } });
-  revalidateTag("packages", "max");
+  revalidateTag("packages", { expire: 0 });
 }
 
 export async function getPackagesCount(): Promise<number> {

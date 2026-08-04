@@ -1,10 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { Link, usePathname } from "@/shared/i18n/navigation";
-import { Button } from "@/shared/ui/Button";
-import { getWhatsappHref } from "@/shared/lib/contact";
 import { MobileMenu } from "./MobileMenu";
 
 const NAV_LINKS = [
@@ -26,16 +25,18 @@ export function Navbar({ whatsappNumber }: NavbarProps) {
   const locale = useLocale();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const whatsappHref = getWhatsappHref(
-    "Здравствуйте! Хочу узнать про зал в «Айкөл».",
-    whatsappNumber,
-  );
 
   return (
     <header className="fixed inset-x-0 top-0 z-30 border-b border-line bg-bg/95 backdrop-blur-md">
       <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-4 sm:px-6">
-        <Link href="/" className="font-heading text-xl text-gold">
-          Айкөл
+        <Link href="/" className="relative h-16 w-40 shrink-0">
+          <Image
+            src="/images/aikollogo.png"
+            alt="Айкөл"
+            fill
+            className="object-contain object-left"
+            priority
+          />
         </Link>
 
         <nav className="hidden items-center gap-6 md:flex">
@@ -50,27 +51,22 @@ export function Navbar({ whatsappNumber }: NavbarProps) {
           ))}
         </nav>
 
-        <div className="hidden items-center gap-4 md:flex">
-          <div className="flex gap-1 text-sm">
-            <Link
-              href={pathname}
-              locale="ru"
-              className={locale === "ru" ? "text-gold" : "text-text-muted"}
-            >
-              RU
-            </Link>
-            <span className="text-text-muted">/</span>
-            <Link
-              href={pathname}
-              locale="kg"
-              className={locale === "kg" ? "text-gold" : "text-text-muted"}
-            >
-              КЫР
-            </Link>
-          </div>
-          <a href={whatsappHref} target="_blank" rel="noopener noreferrer">
-            <Button>{t("contactCta")}</Button>
-          </a>
+        <div className="hidden items-center gap-1 text-sm md:flex">
+          <Link
+            href={pathname}
+            locale="ru"
+            className={locale === "ru" ? "text-gold" : "text-text-muted"}
+          >
+            RU
+          </Link>
+          <span className="text-text-muted">/</span>
+          <Link
+            href={pathname}
+            locale="kg"
+            className={locale === "kg" ? "text-gold" : "text-text-muted"}
+          >
+            КЫР
+          </Link>
         </div>
 
         <button

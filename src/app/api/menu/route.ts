@@ -12,6 +12,7 @@ const createItemSchema = z.object({
   name: z.string().min(1).max(200),
   nameKg: z.string().min(1).max(200),
   image: z.string().url().optional(),
+  isFeatured: z.boolean().optional(),
   categoryId: z.string(),
 });
 

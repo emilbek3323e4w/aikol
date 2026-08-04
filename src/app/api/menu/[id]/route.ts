@@ -9,6 +9,7 @@ const patchSchema = z.object({
   image: z.string().url().optional(),
   categoryId: z.string().optional(),
   isAvailable: z.boolean().optional(),
+  isFeatured: z.boolean().optional(),
 });
 
 export async function PATCH(

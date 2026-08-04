@@ -6,6 +6,7 @@ import { apiError, apiSuccess } from "@/shared/lib/apiResponse";
 const schema = z.object({
   name: z.string().min(1).max(100),
   nameKg: z.string().min(1).max(100),
+  image: z.string().url().optional(),
 });
 
 export async function POST(request: Request) {

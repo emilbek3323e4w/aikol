@@ -6,6 +6,7 @@ function serializeCategory(category: {
   id: string;
   name: string;
   nameKg: string;
+  image: string | null;
   order: number;
   items: {
     id: string;
@@ -13,6 +14,7 @@ function serializeCategory(category: {
     nameKg: string;
     image: string | null;
     isAvailable: boolean;
+    isFeatured: boolean;
     order: number;
     categoryId: string;
   }[];
@@ -21,6 +23,7 @@ function serializeCategory(category: {
     id: category.id,
     name: category.name,
     nameKg: category.nameKg,
+    image: category.image,
     order: category.order,
     items: category.items,
   };
@@ -53,23 +56,60 @@ export async function getAllMenuCategories(): Promise<MenuCategory[]> {
   return categories.map(serializeCategory);
 }
 
-export async function createMenuCategory(input: {
+async function fetchFeaturedMenuItems(): Promise<MenuItem[]> {
+  return prisma.menuItem.findMany({
+    where: { isFeatured: true, isAvailable: true },
+    orderBy: { order: "asc" },
+  });
+}
+
+export const getFeaturedMenuItems = unstable_cache(
+  fetchFeaturedMenuItems,
+  ["featured-menu-items"],
+  { tags: ["menu"], revalidate: 3600 },
+);
+
+interface MenuCategoryInput {
   name: string;
   nameKg: string;
-}): Promise<MenuCategory> {
+  image?: string;
+}
+
+export async function createMenuCategory(
+  input: MenuCategoryInput,
+): Promise<MenuCategory> {
   const count = await prisma.menuCategory.count();
   const category = await prisma.menuCategory.create({
     data: { ...input, order: count },
     include: { items: true },
   });
-  revalidateTag("menu", "max");
+  revalidateTag("menu", { expire: 0 });
   return serializeCategory(category);
+}
+
+export async function updateMenuCategory(
+  id: string,
+  input: Partial<MenuCategoryInput>,
+): Promise<MenuCategory> {
+  const category = await prisma.menuCategory.update({
+    where: { id },
+    data: input,
+    include: { items: { orderBy: { order: "asc" } } },
+  });
+  revalidateTag("menu", { expire: 0 });
+  return serializeCategory(category);
+}
+
+export async function deleteMenuCategory(id: string): Promise<void> {
+  await prisma.menuCategory.delete({ where: { id } });
+  revalidateTag("menu", { expire: 0 });
 }
 
 interface MenuItemInput {
   name: string;
   nameKg: string;
   image?: string;
+  isFeatured?: boolean;
   categoryId: string;
 }
 
@@ -78,7 +118,7 @@ export async function createMenuItem(input: MenuItemInput): Promise<MenuItem> {
     where: { categoryId: input.categoryId },
   });
   const item = await prisma.menuItem.create({ data: { ...input, order: count } });
-  revalidateTag("menu", "max");
+  revalidateTag("menu", { expire: 0 });
   return item;
 }
 
@@ -87,11 +127,11 @@ export async function updateMenuItem(
   input: Partial<MenuItemInput> & { isAvailable?: boolean },
 ): Promise<MenuItem> {
   const item = await prisma.menuItem.update({ where: { id }, data: input });
-  revalidateTag("menu", "max");
+  revalidateTag("menu", { expire: 0 });
   return item;
 }
 
 export async function deleteMenuItem(id: string): Promise<void> {
   await prisma.menuItem.delete({ where: { id } });
-  revalidateTag("menu", "max");
+  revalidateTag("menu", { expire: 0 });
 }

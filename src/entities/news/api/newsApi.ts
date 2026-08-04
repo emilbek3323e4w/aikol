@@ -67,7 +67,7 @@ interface NewsInput {
 
 export async function createNews(input: NewsInput): Promise<News> {
   const news = await prisma.news.create({ data: input });
-  revalidateTag("news", "max");
+  revalidateTag("news", { expire: 0 });
   return serialize(news);
 }
 
@@ -76,11 +76,11 @@ export async function updateNews(
   input: Partial<NewsInput>,
 ): Promise<News> {
   const news = await prisma.news.update({ where: { id }, data: input });
-  revalidateTag("news", "max");
+  revalidateTag("news", { expire: 0 });
   return serialize(news);
 }
 
 export async function deleteNews(id: string): Promise<void> {
   await prisma.news.delete({ where: { id } });
-  revalidateTag("news", "max");
+  revalidateTag("news", { expire: 0 });
 }

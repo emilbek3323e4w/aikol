@@ -45,5 +45,5 @@ export async function updateSettings(
       }),
     ),
   );
-  revalidateTag("settings", "max");
+  revalidateTag("settings", { expire: 0 });
 }
