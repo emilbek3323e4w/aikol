@@ -53,7 +53,7 @@ export function MobileMenu({
       aria-hidden={!open}
     >
       <div
-        className={`absolute inset-0 bg-black/70 transition-opacity ${
+        className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity ${
           open ? "opacity-100" : "opacity-0"
         }`}
         onClick={onClose}

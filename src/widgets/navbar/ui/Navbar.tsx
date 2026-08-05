@@ -27,6 +27,7 @@ export function Navbar({ whatsappNumber }: NavbarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
+    <>
     <header className="fixed inset-x-0 top-0 z-30 border-b border-line bg-bg/95 backdrop-blur-md">
       <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-4 sm:px-6">
         <Link href="/" className="relative h-16 w-40 shrink-0">
@@ -80,13 +81,14 @@ export function Navbar({ whatsappNumber }: NavbarProps) {
           </svg>
         </button>
       </div>
-
-      <MobileMenu
-        open={mobileOpen}
-        onClose={() => setMobileOpen(false)}
-        locale={locale}
-        whatsappNumber={whatsappNumber}
-      />
     </header>
+
+    <MobileMenu
+      open={mobileOpen}
+      onClose={() => setMobileOpen(false)}
+      locale={locale}
+      whatsappNumber={whatsappNumber}
+    />
+    </>
   );
 }
