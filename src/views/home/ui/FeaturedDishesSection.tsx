@@ -33,7 +33,7 @@ export function FeaturedDishesSection({
           {cta} →
         </Link>
       </div>
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+      <div className="grid grid-cols-2 gap-3 sm:gap-6">
         {dishes.map((item) => (
           <MenuCard
             key={item.id}
