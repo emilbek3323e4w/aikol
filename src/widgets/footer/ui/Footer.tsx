@@ -18,7 +18,7 @@ export function Footer({ settings }: FooterProps) {
 
   return (
     <footer className="border-t border-line bg-bg-secondary">
-      <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:px-6 md:grid-cols-3">
+      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 px-4 py-12 sm:px-6 md:grid-cols-3">
         <div>
           <span className="font-heading text-xl text-gold">Айкөл</span>
           <div className="mt-3 flex gap-2">
