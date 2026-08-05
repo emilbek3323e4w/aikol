@@ -11,7 +11,7 @@ export function MenuCard({ item, locale, onImageClick }: MenuCardProps) {
   const name = locale === "kg" ? item.nameKg : item.name;
 
   return (
-    <div className="relative aspect-3/4 overflow-hidden rounded-2xl bg-surface-muted">
+    <div className="relative aspect-3/4 min-w-0 overflow-hidden rounded-2xl bg-surface-muted">
       {item.image &&
         (onImageClick ? (
           <button
