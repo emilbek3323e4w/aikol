@@ -11,7 +11,7 @@ export function MenuCard({ item, locale, onImageClick }: MenuCardProps) {
   const name = locale === "kg" ? item.nameKg : item.name;
 
   return (
-    <div className="relative mx-auto aspect-3/4 w-full max-w-42.5 min-w-0 overflow-hidden rounded-2xl bg-surface-muted sm:max-w-none">
+    <div className="relative aspect-3/4 min-w-0 overflow-hidden rounded-2xl bg-surface-muted">
       {item.image &&
         (onImageClick ? (
           <button
@@ -38,7 +38,7 @@ export function MenuCard({ item, locale, onImageClick }: MenuCardProps) {
           />
         ))}
       <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/75 to-60% to-transparent" />
-      <h3 className="pointer-events-none absolute inset-x-0 bottom-0 w-full truncate px-3 pb-3 font-heading text-sm font-bold text-white [text-shadow:0_1px_6px_rgba(0,0,0,0.5)] sm:px-5 sm:pb-5 sm:text-2xl">
+      <h3 className="pointer-events-none absolute inset-x-0 bottom-0 w-full truncate px-5 pb-5 font-heading text-xl font-bold text-white [text-shadow:0_1px_6px_rgba(0,0,0,0.5)] sm:text-2xl">
         {name}
       </h3>
     </div>
